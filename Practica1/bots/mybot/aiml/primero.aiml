@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="2.0">
+	<!-- Pruebas -->
+	<category>
+		<pattern>Hola</pattern>
+		<template>Hola, qué tal?</template>
+	</category>
+
+	<category>
+		<pattern>adios</pattern>
+		<template>hasta luego</template>
+	</category>
+
+	<category>
+		<pattern>me llamo *</pattern>
+		<template>
+			<think>
+				<set var="nombre"><star/></set>
+			</think>
+			La verdad es que <get var="nombre"/> es un nombre super feo
+		</template>
+	</category>
+
+	<category>
+		<pattern>mi color favorito es el *</pattern>
+		<template>
+			<think>
+				<set var="color"><star/></set>
+			</think>
+			<get var="color"/> es un color casi tan feo como tú, <get var="nombre"/>
+		</template>
+	</category>
+
+	<category>
+		<pattern>dime el color de las frutas</pattern>
+		<template>
+			<think>
+				<set var="lista"><readset>fruta</readset></set>
+				<set var="item"><srai>iterate <get var="lista"/></srai></set>
+			</think>
+			<condition var="item">
+				<li value="$"></li> <!-- terminar bucle -->
+				<li>
+					<think>
+						<set var="color"><map name="color"><get var="item" /></map></set>
+					</think>
+					<get var="item" /> tiene color <get var="color" />
+					<think>
+						<set var="item"><srai>NEXT</srai></set>
+					</think>
+					<loop /> <!-- seguir iterando -->
+				</li>
+			</condition>
+		</template>
+	</category>
+</aiml>

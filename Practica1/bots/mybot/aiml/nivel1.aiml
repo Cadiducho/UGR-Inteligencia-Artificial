@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="2.0">
+
+<!--Eleccion de fruta-->
+<category>
+  <pattern>piensa en una fruta</pattern>
+  <template>
+    <think>
+      <set var="count"><srai>COUNT <readset>fruta</readset></srai></set>
+      <set var="pos"><srai>RANDOM <get var="count"/></srai></set>
+      <set name="fruta"><srai>SELECTITEM <get var="pos"/> IN <readset>fruta</readset></srai></set>
+    </think>
+    Ya he escogido una
+  </template>
+</category>
+<category>
+  <pattern>* ^ una fruta</pattern>
+  <template><srai>piensa en una fruta</srai></template>
+</category>
+
+<!-- es de sabor X -->
+<category>
+  <pattern>es de sabor *</pattern>
+  <template>
+    <think>
+      <set var="saborPreguntado"><star/></set>
+      <set var="sabores"><map name="sabor"><get name="fruta"/></map></set>
+    </think>
+    <condition var="sabores">
+      <li><value><get var="saborPreguntado"/></value> Sí</li>
+      <li>No</li>
+    </condition>
+  </template>
+</category>
+<!-- abreviacion para el sabor -->
+<category>
+  <pattern>es <set>sabor</set></pattern>
+  <template><srai>es de sabor <star/></srai></template>
+</category>
+
+<!-- ¿tiene vitaminas? -->
+<category>
+  <pattern>tiene vitamina *</pattern>
+  <template>
+    <think>
+      <set var="tipoVitamina"><star/></set>
+      <condition var="tipoVitamina">
+        <li value="a">
+          <set var="vitaminas"><map name="vitaminaa"><get name="fruta"/></map></set>
+        </li>
+        <li value="b">
+          <set var="vitaminas"><map name="vitaminab"><get name="fruta"/></map></set>
+        </li>
+        <li value="c">
+          <set var="vitaminas"><map name="vitaminac"><get name="fruta"/></map></set>
+        </li>
+      </condition>
+    </think>
+    <condition var="vitaminas">
+      <li value="Si">Sí</li>
+      <li>No</li>
+    </condition>
+  </template>
+</category>
+<!-- es grande o pequeño? -->
+<category>
+  <pattern>es de tamanio *</pattern>
+  <template>
+    <think>
+      <set var="sizePreguntado"><star/></set>
+      <set var="sizeFruta"><map name="tamaño"><get name="fruta"/></map></set>
+    </think>
+    <condition var="sizeFruta">
+      <li><value><get var="sizePreguntado"/></value>Sí</li>
+      <li>No</li>
+    </condition>
+  </template>
+</category>
+<category>
+  <pattern>es de tamanyo *</pattern>
+  <template><srai>es de tamanio <star/></srai></template>
+</category>
+<category>
+  <pattern>es <set>tamaño</set></pattern>
+  <template><srai>es de tamanio <star/></srai></template>
+</category>
+<!-- es de color rojo? -->
+<category>
+  <pattern>es de color *</pattern>
+  <template>
+    <think>
+      <set var="colorPreguntado"><star/></set>
+      <set var="colorFruta"><map name="color"><get name="fruta"/></map></set>
+      <set var="find"><srai>FINDITEM <get var="colorPreguntado"/> IN <map name="color"><get name="fruta"/></map></srai></set>
+    </think>
+    <condition var="find">
+      <li value="0">No</li>
+      <li>Sí</li>
+    </condition>
+  </template>
+</category>
+<category>
+  <pattern>es <set>color</set></pattern>
+  <template><srai>es de color <star/></srai></template>
+</category>
+<!-- adivinar la fruta -->
+<category>
+  <pattern>la fruta es *</pattern>
+  <template>
+    <think>
+      <set var="intento"><star/></set>
+    </think>
+    <condition var="intento">
+      <li><value><get name="fruta"/></value> Sí! Has ganado.</li>
+      <li>No :( Sigue intentándolo </li>
+    </condition>
+  </template>
+</category>
+<category>
+  <pattern>es <set>fruta</set></pattern>
+  <template><srai>la fruta es <star/></srai></template>
+</category>
+</aiml>

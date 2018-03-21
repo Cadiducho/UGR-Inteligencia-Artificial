@@ -1,0 +1,7 @@
+*.DS_Store
+*.pdf
+Practica2/CMakeCache\.txt
+
+Practica2/CMakeFiles/
+
+*.cmake

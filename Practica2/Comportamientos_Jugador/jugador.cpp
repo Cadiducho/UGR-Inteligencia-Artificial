@@ -59,7 +59,11 @@ void ComportamientoJugador::VisualizaPlan(const estado &st, const list<Action> &
 
 
 bool ComportamientoJugador::pathFinding(const estado &origen, const estado &destino, list<Action> &plan) {
-  return false;
+	plan.clear();
+
+	VisualizaPlan(origen, plan);
+
+	return true;
 }
 
 Action ComportamientoJugador::think(Sensores sensores) {
@@ -89,6 +93,9 @@ Action ComportamientoJugador::think(Sensores sensores) {
 
 	cout << "fil: " << fil << ", col: " << col << ", orientacion: " << brujula << endl;
 
+	if (sensores.reset) {
+		hayPlan = false;
+	}
 	//Comportamiento del agente
 	Action sigAccion;
   if (sensores.terreno[2] == 'T' || sensores.terreno[2] == 'S'|| sensores.terreno[2] == 'K'

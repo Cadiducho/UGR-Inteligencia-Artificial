@@ -96,16 +96,38 @@ Action ComportamientoJugador::think(Sensores sensores) {
 	if (sensores.reset) {
 		hayPlan = false;
 	}
-	//Comportamiento del agente
-	Action sigAccion;
-  if (sensores.terreno[2] == 'T' || sensores.terreno[2] == 'S'|| sensores.terreno[2] == 'K'
-			&& sensores.superficie[2] == 'a') {
-		sigAccion = actFORWARD;
-	} else {
-		sigAccion = actTURN_R;
+
+	//Si se ha cambiado el destino, calcular un nuevo plan
+ 	if (hayPlan && (sensores.destinoF != ultimaPosicionF || sensores.destinoC != ultimaPosicionC)) {
+		cout << "El destino ha cambiado" << endl;
+		hayPlan = false;
 	}
 
-	//recordar la ultima accion
+	// Generar nuevo plan
+	if (!hayPlan) {
+		estado origen, destino;
+		origen.fila = fil;
+		origen.columna = col;
+		origen.orientacion = brujula;
+
+		destino.fila = sensores.destinoF;
+		destino.columna = sensores.destinoC;
+
+    hayPlan = pathFinding(origen,destino,plan);
+
+		ultimaPosicionF = sensores.destinoF;
+		ultimaPosicionC = sensores.destinoC;
+	}
+
+	// Ejecutar el plan
+	Action sigAccion;
+	if (hayPlan && plan.size() > 0) {
+		sigAccion = plan.front();
+		plan.erase(plan.begin());
+	} else {
+		sigAccion = actIDLE;
+	}
+
 	ultimaAccion = sigAccion;
 	return sigAccion;
 }

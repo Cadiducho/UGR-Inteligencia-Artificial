@@ -52,6 +52,8 @@ class ComportamientoJugador : public Comportamiento {
     //Nuevas variables de Estado
     Action ultimaAccion;
     bool hayPlan;
+    int ultimaPosicionF;
+    int ultimaPosicionC;
 
     bool pathFinding(const estado &origen, const estado &destino, list<Action> &plan);
     void PintaPlan(list<Action> plan);

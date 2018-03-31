@@ -61,6 +61,82 @@ void ComportamientoJugador::VisualizaPlan(const estado &st, const list<Action> &
 bool ComportamientoJugador::pathFinding(const estado &origen, const estado &destino, list<Action> &plan) {
 	plan.clear();
 
+	estado st = origen;
+
+	int difF = origen.fila - destino.fila;
+	int difC = origen.columna - destino.columna;
+
+	// Reduzco la distancia en columnas
+	if (difC < 0){
+		if (st.orientacion == 0){
+			plan.push_back(actTURN_R);
+			st.orientacion = 1;
+		}
+		else if (st.orientacion == 3){
+					plan.push_back(actTURN_R);
+					plan.push_back(actTURN_R);
+					st.orientacion = 1;
+		}
+		else if (st.orientacion == 2){
+					plan.push_back(actTURN_L);
+					st.orientacion = 1;
+		}
+	}
+	else if (difC > 0){
+		if (st.orientacion == 0){
+			plan.push_back(actTURN_L);
+			st.orientacion = 3;
+		}
+		else if (st.orientacion == 1){
+					plan.push_back(actTURN_R);
+					plan.push_back(actTURN_R);
+					st.orientacion = 3;
+		}
+		else if (st.orientacion == 2){
+					plan.push_back(actTURN_R);
+					st.orientacion = 3;
+		}
+	}
+
+	// Avanzo la diferencia entre columnas
+	if (difC<0)
+	  difC = -difC;
+
+  for (int i=0; i < difC; i++){
+		plan.push_back(actFORWARD);
+	}
+
+	// Reduzco la distancia en filas
+	if (difF < 0){
+		if (st.orientacion == 1){
+			plan.push_back(actTURN_R);
+			st.orientacion = 2;
+		}
+		else if (st.orientacion == 3){
+					plan.push_back(actTURN_L);
+					st.orientacion = 2;
+		}
+	}
+	else if (difF > 0){
+		if (st.orientacion == 1){
+			plan.push_back(actTURN_L);
+			st.orientacion = 0;
+		}
+		else if (st.orientacion == 3){
+					plan.push_back(actTURN_R);
+					st.orientacion = 0;
+		}
+	}
+
+
+	// Avanzo la diferencia entre columnas
+	if (difF<0)
+	  difF = -difF;
+
+  for (int i=0; i < difF; i++){
+		plan.push_back(actFORWARD);
+	}
+
 	VisualizaPlan(origen, plan);
 
 	return true;

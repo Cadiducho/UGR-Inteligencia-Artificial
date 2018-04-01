@@ -4,11 +4,23 @@
 #include "comportamientos/comportamiento.hpp"
 
 #include <list>
+#include <set>
+#include <algorithm>
 
 struct estado {
   int fila;
   int columna;
   int orientacion;
+
+  // Para el pathFinding
+  estado() {
+    G = H = 0;
+  }
+
+  int G, H = 0; //Distancias y heuristicas
+  int getPuntuacion() {
+    return G + H;
+  }
 };
 
 class ComportamientoJugador : public Comportamiento {

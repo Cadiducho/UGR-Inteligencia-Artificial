@@ -61,23 +61,23 @@ bool ComportamientoJugador::pathFinding(const estado &origen, const estado &dest
 	plan.clear();
 
 	//Declaraciones para el inicio del algoritmo
-	estado actual;
-	std::vector<estado> openSet, closedSet;
-	openSet.push_back(origen);
+	Node *actual;
+	NodeSet openSet, closedSet;
+	openSet.insert(new Node(origen));
 
 	while (!openSet.empty()) {
 		actual = *openSet.begin();
 		for (auto node : openSet) {
-    	if (node.getPuntuacion() <= actual.getPuntuacion()) {
+    	if (node->getPuntuacion() <= actual->getPuntuacion()) {
       	actual = node;
       }
     }
 
-		if (actual.fila == destino.fila && actual.columna == destino.columna && actual.orientacion == destino.orientacion) {
+		if (actual->coordenadas.fila == destino.fila && actual->coordenadas.columna == destino.columna && actual->coordenadas.orientacion == destino.orientacion) {
 			break; //Solucion alcanzada
 		}
 
-		closedSet.push_back(actual);
+		closedSet.insert(actual);
 		openSet.erase(std::find(openSet.begin(), openSet.end(), actual));
 
 	}

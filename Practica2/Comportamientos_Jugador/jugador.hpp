@@ -11,17 +11,25 @@ struct estado {
   int fila;
   int columna;
   int orientacion;
+};
 
-  // Para el pathFinding
-  estado() {
+class Node {
+public:
+  Node * parent;
+  estado coordenadas;
+  int G, H;
+
+  Node(const estado &coord) {
+    coordenadas = coord;
     G = H = 0;
   }
 
-  int G, H = 0; //Distancias y heuristicas
-  int getPuntuacion() {
+  inline int getPuntuacion() {
     return G + H;
   }
 };
+
+using NodeSet = std::set<Node*>;
 
 class ComportamientoJugador : public Comportamiento {
   public:

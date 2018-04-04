@@ -57,6 +57,27 @@ void ComportamientoJugador::VisualizaPlan(const estado &st, const list<Action> &
 	}
 }
 
+estado ComportamientoJugador::delta(estado inicio, estado fin) {
+	estado delta;
+	delta.fila = abs(inicio.fila - fin.fila);
+	delta.columna = abs(inicio.columna - inicio.columna);
+	return delta;
+}
+//Euclides
+int ComportamientoJugador::heuristic(estado inicio, estado fin) {
+    estado delta = delta(inicio, fin);
+    return static_cast<uint>(10 * sqrt(pow(delta.fila, 2) + pow(delta.columna, 2)));
+}
+
+Node* ComportamientoJugador::buscarNodoEnSet(NodeSet& nodos, estado estado) {
+    for (auto node : nodos) {
+        if (node->coordenadas.fila == estado.fila && node->coordenadas.columna == estado.columna) {
+            return node;
+        }
+    }
+    return nullptr;
+}
+
 bool ComportamientoJugador::pathFinding(const estado &origen, const estado &destino, list<Action> &plan) {
 	plan.clear();
 

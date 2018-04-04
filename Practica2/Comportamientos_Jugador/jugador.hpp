@@ -77,6 +77,10 @@ class ComportamientoJugador : public Comportamiento {
 
     bool pathFinding(const estado &origen, const estado &destino, list<Action> &plan);
     void PintaPlan(list<Action> plan);
+
+    Node* buscarNodoEnSet(NodeSet& nodos, estado estado);
+    estado ComportamientoJugador::delta(estado inicio, estado fin);
+    int ComportamientoJugador::heuristic(estado inicio, estado fin);
 };
 
 #endif

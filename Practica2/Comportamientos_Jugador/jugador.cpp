@@ -101,6 +101,30 @@ bool ComportamientoJugador::pathFinding(const estado &origen, const estado &dest
 		closedSet.insert(actual);
 		openSet.erase(std::find(openSet.begin(), openSet.end(), actual));
 
+		for (int i = 0; i < 3; ++i) {
+			//Establecer nuevo hijo segun si es norte, sur, este u oeste
+			estado nuevoHijo = actual->coordenadas;
+			switch (i) {
+				case 0: nuevoHijo.fila--; break;
+				case 1: nuevoHijo.columna++; break;
+				case 2: nuevoHijo.fila++; break;
+				case 3: nuevoHijo.columna--; break;
+			}
+
+			//Crear nodo y buscarlo en la lista para inicializarlo
+			int totalCost = actual->G + 10;
+			Node *siguiente = findNodeOnList(openSet, nuevoHijo);
+			if (siguiente == nullptr) {
+				siguiente = new Node(nuevoHijo, actual);
+				siguiente->G = totalCost;
+				siguiente->H = heuristic(siguiente->coordenadas, destino);
+				openSet.insert(siguiente);
+			} else if (totalCost < siguiente->G) {
+			  siguiente->parent = actual;
+			  siguiente->G = totalCost;
+			}
+
+		}
 	}
 
 

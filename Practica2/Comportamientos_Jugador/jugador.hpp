@@ -19,8 +19,9 @@ public:
   estado coordenadas;
   int G, H;
 
-  Node(const estado &coord) {
-    coordenadas = coord;
+  Node(const estado &coord, Node *parent = nullptr) {
+    this->coordenadas = coord;
+    this->parent = parent;
     G = H = 0;
   }
 

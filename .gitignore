@@ -1,11 +1,8 @@
 *.DS_Store
 *.pdf
-Practica2/CMakeCache\.txt
-
-Practica2/CMakeFiles/
-
+*/CMakeCache\.txt
+*/CMakeFiles/
 *.cmake
-
 Practica2/Belkan
-
 Practica2/BelkanSG
+Practica2/Makefile

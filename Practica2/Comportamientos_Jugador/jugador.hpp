@@ -5,6 +5,7 @@
 
 #include <list>
 #include <set>
+#include <queue>
 #include <algorithm>
 
 struct estado {
@@ -13,24 +14,78 @@ struct estado {
   int orientacion;
 };
 
-class Node {
-public:
-  Node * parent;
-  estado coordenadas;
-  int G, H;
+class Nodo {
+  private:
+    estado base;
+    list<Action> path;
 
-  Node(const estado &coord, Node *parent = nullptr) {
-    this->coordenadas = coord;
-    this->parent = parent;
-    G = H = 0;
-  }
+    // A*
+    int g, h, f;
+  public:
+    Nodo() { }
+    Nodo(estado estado) {
+      base = estado;
+    }
+    Nodo(int fila, int columna) {
+      base.fila = fila;
+      base.columna = columna;
+    }
+    void addToPath(Action step) {
+      path.push_back(step);
+    }
 
-  inline int getPuntuacion() {
-    return G + H;
-  }
+    //Setters
+    void setG(int g) {
+      this->g = g;
+    }
+    void setH(int h) {
+      this->h = h;
+    }
+    void setF(int f) {
+      this->f = f;
+    }
+    void setBase(estado base) {
+      this->base = base;
+    }
+    //Getters
+    list<Action> getPath() const {
+      return path;
+    }
+    int getG() const {
+      return g;
+    }
+    int getH() const {
+      return h;
+    }
+    int getF() const {
+      return f;
+    }
+    estado getBase() const {
+      return base;
+    }
+    int getFila() const {
+      return base.fila;
+    }
+    int getColumna() const {
+      return base.columna;
+    }
+    int getOrientacion() const {
+      return base.orientacion;
+    }
+    bool operator==(Nodo &otro) const {
+      return otro.getFila() == base.fila && otro.getColumna() == base.columna;
+    }
+		bool operator==(const Nodo &otro) const {
+      return otro.getFila() == base.fila && otro.getColumna() == base.columna;
+    }
 };
 
-using NodeSet = std::set<Node*>;
+struct functorNodos{
+  bool operator()(Nodo &a, Nodo &b){
+    return a.getF() > b.getF() ||
+      (a.getF() == b.getF() && a.getH() > b.getH() );
+  }
+};
 
 class ComportamientoJugador : public Comportamiento {
   public:
@@ -78,10 +133,6 @@ class ComportamientoJugador : public Comportamiento {
 
     bool pathFinding(const estado &origen, const estado &destino, list<Action> &plan);
     void PintaPlan(list<Action> plan);
-
-    Node* buscarNodoEnSet(NodeSet& nodos, estado estado);
-    estado ComportamientoJugador::delta(estado inicio, estado fin);
-    int ComportamientoJugador::heuristic(estado inicio, estado fin);
 };
 
 #endif

@@ -33,104 +33,93 @@ void AnularMatriz(vector<vector<unsigned char> > &m){
 }
 
 void ComportamientoJugador::VisualizaPlan(const estado &st, const list<Action> &plan){
-  AnularMatriz(mapaConPlan);
+	AnularMatriz(mapaConPlan);
 	estado cst = st;
 
 	auto it = plan.begin();
 	while (it!=plan.end()){
-		if (*it == actFORWARD){
-			switch (cst.orientacion) {
-				case 0: cst.fila--; break;
-				case 1: cst.columna++; break;
-				case 2: cst.fila++; break;
-				case 3: cst.columna--; break;
-			}
-			mapaConPlan[cst.fila][cst.columna]=1;
-		}
-		else if (*it == actTURN_R){
-			cst.orientacion = (cst.orientacion+1)%4;
-		}
-		else {
-			cst.orientacion = (cst.orientacion+3)%4;
-		}
-		it++;
+	  if (*it == actFORWARD){
+	    switch (cst.orientacion) {
+	      case 0: cst.fila--; break;
+	      case 1: cst.columna++; break;
+	      case 2: cst.fila++; break;
+	      case 3: cst.columna--; break;
+	    }
+	    mapaConPlan[cst.fila][cst.columna]=1;
+	  } else if (*it == actTURN_R){
+	    cst.orientacion = (cst.orientacion+1)%4;
+	  } else {
+	    cst.orientacion = (cst.orientacion+3)%4;
+	  }
+	  it++;
 	}
-}
-
-estado ComportamientoJugador::delta(estado inicio, estado fin) {
-	estado delta;
-	delta.fila = abs(inicio.fila - fin.fila);
-	delta.columna = abs(inicio.columna - inicio.columna);
-	return delta;
-}
-//Euclides
-int ComportamientoJugador::heuristic(estado inicio, estado fin) {
-    estado delta = delta(inicio, fin);
-    return static_cast<uint>(10 * sqrt(pow(delta.fila, 2) + pow(delta.columna, 2)));
-}
-
-Node* ComportamientoJugador::buscarNodoEnSet(NodeSet& nodos, estado estado) {
-    for (auto node : nodos) {
-        if (node->coordenadas.fila == estado.fila && node->coordenadas.columna == estado.columna) {
-            return node;
-        }
-    }
-    return nullptr;
 }
 
 bool ComportamientoJugador::pathFinding(const estado &origen, const estado &destino, list<Action> &plan) {
 	plan.clear();
 
 	//Declaraciones para el inicio del algoritmo
-	Node *actual;
-	NodeSet openSet, closedSet;
-	openSet.insert(new Node(origen));
+	Nodo actual, inicio, fin;
+	list<Nodo> cerrados, listaAbiertos, vecinos;
+	list<Action> currentPath;
+	priority_queue<Nodo, vector<Nodo>, functorNodos> abiertos;
 
-	while (!openSet.empty()) {
-		actual = *openSet.begin();
-		for (auto node : openSet) {
-    	if (node->getPuntuacion() <= actual->getPuntuacion()) {
-      	actual = node;
-      }
-    }
+	inicio.setH(0);
+	inicio.setG(0);
+	inicio.setF(0);
+	inicio.setBase(origen);
 
-		if (actual->coordenadas.fila == destino.fila && actual->coordenadas.columna == destino.columna && actual->coordenadas.orientacion == destino.orientacion) {
-			break; //Solucion alcanzada
+	abiertos.push(inicio);
+	listaAbiertos.push_back(inicio);
+
+	fin.setBase(destino);
+
+	//A*
+	while (!abiertos.empty()) {
+		actual.setBase(abiertos.top().getBase());
+		actual.setF(abiertos.top().getF());
+		actual.setH(abiertos.top().getH());
+		actual.setG(abiertos.top().getG());
+
+		list<Action> camino = abiertos.top().getPath();
+
+		listaAbiertos.erase(find(listaAbiertos.begin(), listaAbiertos.end(), abiertos.top()));
+		abiertos.pop();
+
+		//Volcar el camino hasta el nodo al total
+		while (!camino.empty()) {
+			currentPath.push_back(camino.front());
+			camino.pop_front();
 		}
 
-		closedSet.insert(actual);
-		openSet.erase(std::find(openSet.begin(), openSet.end(), actual));
+		cerrados.push_back(actual);
 
-		for (int i = 0; i < 3; ++i) {
-			//Establecer nuevo hijo segun si es norte, sur, este u oeste
-			estado nuevoHijo = actual->coordenadas;
-			switch (i) {
-				case 0: nuevoHijo.fila--; break;
-				case 1: nuevoHijo.columna++; break;
-				case 2: nuevoHijo.fila++; break;
-				case 3: nuevoHijo.columna--; break;
+		//Si hemos llegado al final, terminar algoritmo y devolver path
+		if (actual.getFila() == destino.fila && actual.getColumna() == destino.columna){
+			plan = currentPath;
+
+			//borro la ultima accion que es siempre ir recto
+			if (!plan.empty()){
+				plan.pop_back();
 			}
 
-			//Crear nodo y buscarlo en la lista para inicializarlo
-			int totalCost = actual->G + 10;
-			Node *siguiente = findNodeOnList(openSet, nuevoHijo);
-			if (siguiente == nullptr) {
-				siguiente = new Node(nuevoHijo, actual);
-				siguiente->G = totalCost;
-				siguiente->H = heuristic(siguiente->coordenadas, destino);
-				openSet.insert(siguiente);
-			} else if (totalCost < siguiente->G) {
-			  siguiente->parent = actual;
-			  siguiente->G = totalCost;
-			}
+			VisualizaPlan(origen, plan);
+			return true; //hay camino
+		}
 
+		//Asigno los costes a los vecinos
+		//TODO
+
+		//Analizar costes y proseguir con el algortimo
+		for (auto vecino : vecinos) {
+			//Si el vecino es transitable (menor que 1000 coste) y no está en cerrados
+			if (vecino.getG() < 1000 && find(cerrados.begin(), cerrados.end(), vecino) == cerrados.end()) {
+
+			}
 		}
 	}
 
-
-	VisualizaPlan(origen, plan);
-
-	return true;
+	return false; //no hay camino
 }
 
 Action ComportamientoJugador::think(Sensores sensores) {
@@ -188,7 +177,7 @@ Action ComportamientoJugador::think(Sensores sensores) {
 
 	// Ejecutar el plan
 	Action sigAccion;
-	if (hayPlan && plan.size() > 0) {
+	if (hayPlan && plan.size() > 0 && !(fil == 'a' || col == 'a')) {
 		sigAccion = plan.front();
 		plan.erase(plan.begin());
 	} else {

@@ -14,76 +14,25 @@ struct estado {
   int orientacion;
 };
 
-class Nodo {
-  private:
-    estado base;
-    list<Action> path;
+struct nodo{
+		estado first;
+		list<Action> second;
 
-    // A*
-    int g, h, f;
-  public:
-    Nodo() { }
-    Nodo(estado estado) {
-      base = estado;
+		int g, h;
+    inline int getF() {
+      return g + h;
     }
-    Nodo(int fila, int columna) {
-      base.fila = fila;
-      base.columna = columna;
-    }
-    void addToPath(Action step) {
-      path.push_back(step);
-    }
-
-    //Setters
-    void setG(int g) {
-      this->g = g;
-    }
-    void setH(int h) {
-      this->h = h;
-    }
-    void setF(int f) {
-      this->f = f;
-    }
-    void setBase(estado base) {
-      this->base = base;
-    }
-    //Getters
-    list<Action> getPath() const {
-      return path;
-    }
-    int getG() const {
-      return g;
-    }
-    int getH() const {
-      return h;
-    }
-    int getF() const {
-      return f;
-    }
-    estado getBase() const {
-      return base;
-    }
-    int getFila() const {
-      return base.fila;
-    }
-    int getColumna() const {
-      return base.columna;
-    }
-    int getOrientacion() const {
-      return base.orientacion;
-    }
-    bool operator==(Nodo &otro) const {
-      return otro.getFila() == base.fila && otro.getColumna() == base.columna;
-    }
-		bool operator==(const Nodo &otro) const {
-      return otro.getFila() == base.fila && otro.getColumna() == base.columna;
-    }
+		bool operator<(const nodo &x) const {
+				return ((first.fila < x.first.fila)
+              || (first.fila == x.first.fila and first.columna < x.first.columna)
+              || (first.fila == x.first.fila and first.columna == x.first.columna and first.orientacion < x.first.orientacion));
+		}
 };
 
 struct functorNodos{
-  bool operator()(Nodo &a, Nodo &b){
+  bool operator()(nodo &a, nodo &b){
     return a.getF() > b.getF() ||
-      (a.getF() == b.getF() && a.getH() > b.getH() );
+      (a.getF() == b.getF() && a.h > b.h );
   }
 };
 

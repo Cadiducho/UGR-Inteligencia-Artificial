@@ -55,71 +55,73 @@ void ComportamientoJugador::VisualizaPlan(const estado &st, const list<Action> &
 	}
 }
 
+bool esObstaculo(char ch){
+		return !(ch == 'T' or ch == 'K' or ch == 'S');
+}
+
 bool ComportamientoJugador::pathFinding(const estado &origen, const estado &destino, list<Action> &plan) {
-	plan.clear();
+    list<nodo> abiertos;
+    set<nodo> cerrados;
+    nodo actual;
+    actual.first=origen;
+    abiertos.push_back(actual);
 
-	//Declaraciones para el inicio del algoritmo
-	Nodo actual, inicio, fin;
-	list<Nodo> cerrados, listaAbiertos, vecinos;
-	list<Action> currentPath;
-	priority_queue<Nodo, vector<Nodo>, functorNodos> abiertos;
+    while(!abiertos.empty() and abiertos.front().first.fila != destino.fila or abiertos.front().first.columna != destino.columna ){
+            actual = abiertos.front();
+            abiertos.pop_front();
+            cerrados.insert(actual);
 
-	inicio.setH(0);
-	inicio.setG(0);
-	inicio.setF(0);
-	inicio.setBase(origen);
+						//dcha
+            nodo siguiente = actual;
+            siguiente.first.orientacion = (actual.first.orientacion + 1) % 4;
+            siguiente.second.push_back(actTURN_R);
+            if (cerrados.find(siguiente) == cerrados.end()){
+                abiertos.push_back(siguiente);
+                cerrados.insert(siguiente);
+            }
 
-	abiertos.push(inicio);
-	listaAbiertos.push_back(inicio);
+						//izq
+            siguiente = actual;
+            siguiente.first.orientacion = (actual.first.orientacion + 3) % 4;
+            siguiente.second.push_back(actTURN_L);
+            if (cerrados.find(siguiente) == cerrados.end()){
+                abiertos.push_back(siguiente);
+                cerrados.insert(siguiente);
+            }
 
-	fin.setBase(destino);
+						//avanzar
+            siguiente = actual;
+            switch(actual.first.orientacion){
+            case 0:
+                siguiente.first.fila --;
+            break;
+            case 1:
+                siguiente.first.columna ++;
+            break;
+            case 2:
+                siguiente.first.fila ++;
+            break;
+            case 3:
+                siguiente.first.columna --;
+            break;
+            }
+            if(!esObstaculo(mapaResultado[siguiente.first.fila][siguiente.first.columna])){
+                siguiente.second.push_back(actFORWARD);
+                if (cerrados.find(siguiente) == cerrados.end()){
+                    abiertos.push_back(siguiente);
+                    cerrados.insert(siguiente);
+                }
+            }
+    }
 
-	//A*
-	while (!abiertos.empty()) {
-		actual.setBase(abiertos.top().getBase());
-		actual.setF(abiertos.top().getF());
-		actual.setH(abiertos.top().getH());
-		actual.setG(abiertos.top().getG());
-
-		list<Action> camino = abiertos.top().getPath();
-
-		listaAbiertos.erase(find(listaAbiertos.begin(), listaAbiertos.end(), abiertos.top()));
-		abiertos.pop();
-
-		//Volcar el camino hasta el nodo al total
-		while (!camino.empty()) {
-			currentPath.push_back(camino.front());
-			camino.pop_front();
-		}
-
-		cerrados.push_back(actual);
-
-		//Si hemos llegado al final, terminar algoritmo y devolver path
-		if (actual.getFila() == destino.fila && actual.getColumna() == destino.columna){
-			plan = currentPath;
-
-			//borro la ultima accion que es siempre ir recto
-			if (!plan.empty()){
-				plan.pop_back();
-			}
-
-			VisualizaPlan(origen, plan);
-			return true; //hay camino
-		}
-
-		//Asigno los costes a los vecinos
-		//TODO
-
-		//Analizar costes y proseguir con el algortimo
-		for (auto vecino : vecinos) {
-			//Si el vecino es transitable (menor que 1000 coste) y no está en cerrados
-			if (vecino.getG() < 1000 && find(cerrados.begin(), cerrados.end(), vecino) == cerrados.end()) {
-
-			}
-		}
-	}
-
-	return false; //no hay camino
+    if (!abiertos.empty()) {
+        cout << "Solución encontrada" << endl;
+        plan = abiertos.front().second;
+        return true;
+    } else {
+				cout << "Sin plan" << endl;
+        return false;
+    }
 }
 
 Action ComportamientoJugador::think(Sensores sensores) {
@@ -169,15 +171,51 @@ Action ComportamientoJugador::think(Sensores sensores) {
 		destino.fila = sensores.destinoF;
 		destino.columna = sensores.destinoC;
 
-    hayPlan = pathFinding(origen,destino,plan);
+    hayPlan = pathFinding(origen, destino, plan);
+		VisualizaPlan(origen, plan);
 
 		ultimaPosicionF = sensores.destinoF;
 		ultimaPosicionC = sensores.destinoC;
 	}
 
+	//Intentar detectar a un aldeano y evitarlo
+	int ticksDeEspera = 10;
+	bool aldeanoDelante = sensores.superficie[2] == 'a';
+	if (aldeanoDelante && !plan.empty() && plan.front() == actFORWARD) {
+		cout << "Se evita la colisión" << endl;
+		if (ticksDeEspera > 10) {
+			cout << "Intento calcular un nuevo plan evitando al aldeano" << endl;
+			estado origen, destino;
+			origen.fila = fil;
+			origen.columna = col;
+			origen.orientacion = brujula;
+			destino.fila = sensores.destinoF;
+			destino.columna = sensores.destinoC;
+			list<Action> nuevo_plan;
+      pathFinding(origen, destino, nuevo_plan);
+      int incremento = nuevo_plan.size() - plan.size();
+      // Si el nuevo plan es posible y no añade más del tiempo del que se va a esperar, lo aplico
+      if (!nuevo_plan.empty() && (incremento < 10 || ticksDeEspera >= 10)) {
+        ticksDeEspera = 0;
+        plan = nuevo_plan;
+        VisualizaPlan(origen, plan);
+				cout << "Nuevo plan aplicado" << endl;
+			} else {
+				ticksDeEspera++;
+				cout << "Esperando" << endl;
+	      return actIDLE;
+			}
+		} else {
+			ticksDeEspera++;
+			cout << "Esperando" << endl;
+      return actIDLE;
+			//Corto con el return para que después no se salte acciones del plan creado
+		}
+	}
+
 	// Ejecutar el plan
 	Action sigAccion;
-	if (hayPlan && plan.size() > 0 && !(fil == 'a' || col == 'a')) {
+	if (hayPlan && plan.size() > 0) {
 		sigAccion = plan.front();
 		plan.erase(plan.begin());
 	} else {

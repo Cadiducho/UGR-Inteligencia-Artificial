@@ -28,57 +28,68 @@ string CadiBot::getName() {
 }
 
 Move CadiBot::nextMove(const vector<Move> &adversary, const GameState &state) {
-	Move movimiento;
+	Movimiento movimiento;
 
 	int alpha = INT_MIN;
 	int beta = INT_MAX;
-	movimiento = alfabeta(state, 0, MAX_DEPTH, alpha, beta, JUGADOR_MAX);
-/*	Nodo nodoActual;
-	nodoActual.first = actual;
+	movimiento = alfabeta(state, this->getPlayer(), 0, alpha, beta);
 
-	stack<Nodo> pila;
-	pila.push(nodoActual);
+	cerr << "La puntuación del movimiento es " << movimiento.score << endl;
 
-	while (!pila.empty() && nodoActual.first.getWinner() != yo) {
-		nodoActual = pila.top();
-		pila.pop();
-
-		for (int i = 1; i <= 6; i++) {
-			//Si hay más semillas que 0 es un posible movimiento
-			if (nodoActual.first.getSeedsAt(yo, (Position) i) > 0) {
-				Nodo hijo = nodoActual;
-				hijo.first = nodoActual.first.simulateMove((Move) i);
-				hijo.second.push_back(i);
-				pila.push(hijo);
-			}
-		}
-
-		nodoActual = pila.top();
-	}
-
-	if (pila.empty()) {
-		cerr << "Creo que ya no puedo ganar" << endl;
-		movimiento = (Move) ((rand() % 6) + 1);
-	} else {
-		movimiento = (Move) nodoActual.second.front();
-	} */
-
-	return movimiento;
+	return movimiento.move;
 }
 
-Movimiento CadiBot::alfabeta(const GameState &state, int depth, int maxDepth, int alpha, int beta, int jugador) {
+//ToDo: Hacer una heurística mucho mejor
+int CadiBot::heuristica(const GameState &state, Player jugador) {
+	Player rival = (jugador == J2 ? J1 : J2); //el contrario
+
+	if (state.getSeedsAt(jugador, GRANERO) > 24) {
+		return 30;
+	} else if (state.getSeedsAt(rival, GRANERO) > 24) {
+		return -30;
+	}
+
+	return state.getSeedsAt(jugador, GRANERO);
+}
+
+Movimiento CadiBot::alfabeta(const GameState &state, Player jugador, int depth, int alpha, int beta) {
 	Movimiento movimiento;
 
 	cerr << "Profundidad actual: " << depth << endl;
 
-	if (depth == maxDepth) {
-		cerr << "Maxima profundidad (" << depth << "). Evaluando heurísiticas..." << endl;
-	} else {
-		if (jugador == JUGADOR_MIN) {
-			movimiento.score = INT_MAX;
-		} else if (jugador == JUGADOR_MAX) {
-			movimiento.score = INT_MIN;
+	if (depth == MAX_DEPTH || state.isFinalState()) {
+		movimiento.score = heuristica(state, jugador);
+		cerr << "heuristica: " << movimiento.score << endl;
+		return movimiento;
+	}
+
+	for (int i = 1; (i <= 6) && (alpha < beta); i++) {
+		if (state.getSeedsAt(state.getCurrentPlayer(), (Position) i) > 0) {
+			GameState nuevoHijo = state.simulateMove((Move) i);
+			Movimiento anterior = alfabeta(nuevoHijo, jugador, depth + 1, alpha, beta);
+			if (state.getCurrentPlayer() == jugador) {
+				cerr << "anterior " << anterior.score << endl;
+				if (anterior.score > alpha) {
+					alpha = anterior.score;
+					cerr << "Cambiando alpha a " << alpha << endl;
+					cerr << "ESTABLECIDO A " << i << endl;
+					movimiento.move = (Move) i;
+				}
+			} else {
+				if (anterior.score < beta) {
+					beta = anterior.score;
+					cerr << "Cambiando beta a " << beta << endl;
+				}
+			}
 		}
+	}
+
+	if (state.getCurrentPlayer() == jugador) {
+		movimiento.score = alpha;
+		return movimiento;
+	} else {
+		movimiento.score = beta;
+		return movimiento;
 	}
 
 	return movimiento;

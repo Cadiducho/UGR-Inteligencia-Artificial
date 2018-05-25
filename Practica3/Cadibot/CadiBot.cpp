@@ -34,8 +34,6 @@ Move CadiBot::nextMove(const vector<Move> &adversary, const GameState &state) {
 	int beta = INT_MAX;
 	movimiento = alfabeta(state, this->getPlayer(), 0, alpha, beta);
 
-	cerr << "La puntuación del movimiento es " << movimiento.score << endl;
-
 	return movimiento.move;
 }
 
@@ -55,11 +53,8 @@ int CadiBot::heuristica(const GameState &state, Player jugador) {
 Movimiento CadiBot::alfabeta(const GameState &state, Player jugador, int depth, int alpha, int beta) {
 	Movimiento movimiento;
 
-	cerr << "Profundidad actual: " << depth << endl;
-
 	if (depth == MAX_DEPTH || state.isFinalState()) {
 		movimiento.score = heuristica(state, jugador);
-		cerr << "heuristica: " << movimiento.score << endl;
 		return movimiento;
 	}
 
@@ -68,17 +63,13 @@ Movimiento CadiBot::alfabeta(const GameState &state, Player jugador, int depth, 
 			GameState nuevoHijo = state.simulateMove((Move) i);
 			Movimiento anterior = alfabeta(nuevoHijo, jugador, depth + 1, alpha, beta);
 			if (state.getCurrentPlayer() == jugador) {
-				cerr << "anterior " << anterior.score << endl;
 				if (anterior.score > alpha) {
 					alpha = anterior.score;
-					cerr << "Cambiando alpha a " << alpha << endl;
-					cerr << "ESTABLECIDO A " << i << endl;
 					movimiento.move = (Move) i;
 				}
 			} else {
 				if (anterior.score < beta) {
 					beta = anterior.score;
-					cerr << "Cambiando beta a " << beta << endl;
 				}
 			}
 		}

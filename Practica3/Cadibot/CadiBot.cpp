@@ -37,17 +37,26 @@ Move CadiBot::nextMove(const vector<Move> &adversary, const GameState &state) {
 	return movimiento.move;
 }
 
-//ToDo: Hacer una heurística mucho mejor
 int CadiBot::heuristica(const GameState &state, Player jugador) {
 	Player rival = (jugador == J2 ? J1 : J2); //el contrario
 
-	if (state.getSeedsAt(jugador, GRANERO) > 24) {
-		return 30;
-	} else if (state.getSeedsAt(rival, GRANERO) > 24) {
-		return -30;
+	float miLado = 0;
+	float otroLado = 0;
+	for (int i = 1; i <= 6; i++) {
+			miLado += state.getSeedsAt(jugador, (Position) i);
+			otroLado += state.getSeedsAt(rival, (Position) i);
 	}
+	//Rebajo esos valores a su peso
+	miLado *= 0.45;
+	otroLado *= 0.45;
 
-	return state.getSeedsAt(jugador, GRANERO);
+	miLado += (state.getScore(jugador) * 3.45);
+	otroLado += (state.getScore(rival) * 3.45);
+
+	float diferencia = miLado - otroLado;
+	int heuristica = int(diferencia + 0.5); //redondear al entero superior
+
+	return heuristica;
 }
 
 Movimiento CadiBot::alfabeta(const GameState &state, Player jugador, int depth, int alpha, int beta) {
@@ -58,19 +67,25 @@ Movimiento CadiBot::alfabeta(const GameState &state, Player jugador, int depth, 
 		return movimiento;
 	}
 
-	for (int i = 1; (i <= 6) && (alpha < beta); i++) {
-		if (state.getSeedsAt(state.getCurrentPlayer(), (Position) i) > 0) {
+	for (int i = 1; i <= 6; i++) {
+		if (state.getSeedsAt(state.getCurrentPlayer(), (Position) i) > 0) { //no suicidarse
 			GameState nuevoHijo = state.simulateMove((Move) i);
-			Movimiento anterior = alfabeta(nuevoHijo, jugador, depth + 1, alpha, beta);
+			Movimiento recursivo = alfabeta(nuevoHijo, jugador, depth + 1, alpha, beta);
 			if (state.getCurrentPlayer() == jugador) {
-				if (anterior.score > alpha) {
-					alpha = anterior.score;
+				//alpha = max(score, beta)
+				if (recursivo.score > alpha) {
+					alpha = recursivo.score;
 					movimiento.move = (Move) i;
 				}
 			} else {
-				if (anterior.score < beta) {
-					beta = anterior.score;
+				//beta = max(score, beta)
+				if (recursivo.score < beta) {
+					beta = recursivo.score;
 				}
+			}
+			//poda
+			if (beta <= alpha) {
+				break;
 			}
 		}
 	}

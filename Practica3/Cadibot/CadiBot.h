@@ -3,7 +3,7 @@
 #ifndef CADIBOT_H_
 #define CADIBOT_H_
 
-#define MAX_DEPTH 4
+#define MAX_DEPTH 12
 
 struct Movimiento {
 	Move move;

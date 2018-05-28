@@ -4,7 +4,7 @@
 #include <iostream>
 
 // MODIFICAR: Hacer el include del fichero que contiene al Bot del alumno. Ejemplo
-#include "CadiBot.h"
+#include "Cadibot.h"
 
 
 using namespace std;
@@ -17,7 +17,7 @@ int main() {
 
 
 	// MODIFICAR: Declarar aquí el bot del alumno. Ejemplo:
-	CadiBot *rb= new CadiBot();
+	Cadibot *rb= new Cadibot();
 
 	// MODIFICAR: Asignar el bot del alumno a la variable bot. Ejemplo:
 	bot= (Bot *) rb;

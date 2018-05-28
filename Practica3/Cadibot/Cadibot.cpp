@@ -1,4 +1,4 @@
-#include "CadiBot.h"
+#include "Cadibot.h"
 
 #include <string>
 #include <cstdlib>
@@ -9,25 +9,25 @@
 
 using namespace std;
 
-CadiBot::CadiBot() {
+Cadibot::Cadibot() {
 	// Inicializar las variables necesarias para ejecutar la partida
 	srand(time(0));
 
 }
 
-CadiBot::~CadiBot() {
+Cadibot::~Cadibot() {
 	// Liberar los recursos reservados (memoria, ficheros, etc.)
 }
 
-void CadiBot::initialize() {
+void Cadibot::initialize() {
 	// Inicializar el bot antes de jugar una partida
 }
 
-string CadiBot::getName() {
-	return "CadiBot"; // Sustituir por el nombre del bot
+string Cadibot::getName() {
+	return "Cadibot"; // Sustituir por el nombre del bot
 }
 
-Move CadiBot::nextMove(const vector<Move> &adversary, const GameState &state) {
+Move Cadibot::nextMove(const vector<Move> &adversary, const GameState &state) {
 	Movimiento movimiento;
 
 	int alpha = INT_MIN;
@@ -37,7 +37,7 @@ Move CadiBot::nextMove(const vector<Move> &adversary, const GameState &state) {
 	return movimiento.move;
 }
 
-int CadiBot::heuristica(const GameState &state, Player jugador) {
+int Cadibot::heuristica(const GameState &state, Player jugador) {
 	Player rival = (jugador == J2 ? J1 : J2); //el contrario
 
 	float miLado = 0;
@@ -59,7 +59,7 @@ int CadiBot::heuristica(const GameState &state, Player jugador) {
 	return heuristica;
 }
 
-Movimiento CadiBot::alfabeta(const GameState &state, Player jugador, int depth, int alpha, int beta) {
+Movimiento Cadibot::alfabeta(const GameState &state, Player jugador, int depth, int alpha, int beta) {
 	Movimiento movimiento;
 
 	if (depth == MAX_DEPTH || state.isFinalState()) {

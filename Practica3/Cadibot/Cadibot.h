@@ -10,10 +10,10 @@ struct Movimiento {
 	int score; //heuristica
 };
 
-class CadiBot:Bot {
+class Cadibot:Bot {
 public:
-	CadiBot();
-	~CadiBot();
+	Cadibot();
+	~Cadibot();
 
 
 	void initialize();
